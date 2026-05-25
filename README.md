@@ -4,24 +4,41 @@ A production-grade, cloud-native benchmarking and hosting platform designed to t
 
 ---
 
-## Project Vision & Phase-Wise Approach
+## Git Workflow & Branching Strategy
 
-We approach this project phase-by-phase like an institutional systems engineering team, building outward from a core matching engine to a fully-distributed, auto-scaling, fault-tolerant orchestration platform.
+To manage the complexity of this project, we follow a strict phase-wise branching strategy:
 
-### Phase Progression
-* **Phase 1 (Completed)**: Core Matching Engine & Local APIs (In-memory LOB, REST/WebSocket APIs, thread-safe memory buffers, execution benchmarks).
-* **Phase 2 (Next)**: Concurrent Distributed Load Generator (Bot simulator fleets generating REST/WS traffic at target TPS).
-* **Phase 3**: Metrics & Telemetry Pipeline (OTel, Prometheus scraper, TimescaleDB persistence, Grafana visualization).
-* **Phase 4**: Contestant Submission System & Docker Sandboxing (Secure compilation, gVisor container runtime boundaries).
-* **Phase 5**: Kubernetes Orchestration & Fleet Autoscaling (BenchmarkRun CRDs, network namespace isolation, KEDA autoscaling).
-* **Phase 6**: Real-time Leaderboard Dashboard (Redis Sorted Sets, live Next.js charts, streaming WebSocket feeds).
-* **Phase 7**: Event-Driven Ingestion Bus (Redpanda/Kafka decoupling, HA architecture, consumer-group offsets).
-* **Phase 8**: Low-latency Optimization & Kernel Tuning (eBPF TCP handshake timing, sysctl kernel tuning, zero-allocation FIX parser).
+*   **`main` Branch**: This is the source of truth. It contains only verified, completed, and stable phases. Code is merged here only after a phase is fully tested.
+*   **Phase Branches (`phase-1`, `phase-2`, etc.)**: Active development for a specific phase happens in its dedicated branch. Once the phase is complete and verified, a Pull Request is made to merge it into `main`.
+
+> **Example Workflow:**
+> 1. `git checkout -b phase-2` (Create and switch to branch for Phase 2)
+> 2. Develop, test, and commit features.
+> 3. `git checkout main`
+> 4. `git merge phase-2` (Merge completed work into the main actual branch)
 
 ---
 
-## Phase 1 Architecture: Matching Engine & APIs
+## Table of Contents (Phase-Wise Execution)
 
+Click on any phase below to jump to its specific implementation details and documentation.
+
+*   [Phase 1: Core Matching Engine & Local APIs](#phase-1-core-matching-engine--local-apis) *(Completed)*
+*   [Phase 2: Concurrent Distributed Load Generator](#phase-2-concurrent-distributed-load-generator) *(Upcoming)*
+*   [Phase 3: Metrics & Telemetry Pipeline](#phase-3-metrics--telemetry-pipeline) *(Upcoming)*
+*   [Phase 4: Contestant Submission System & Docker Sandboxing](#phase-4-contestant-submission-system--docker-sandboxing) *(Upcoming)*
+*   [Phase 5: Kubernetes Orchestration & Fleet Autoscaling](#phase-5-kubernetes-orchestration--fleet-autoscaling) *(Upcoming)*
+*   [Phase 6: Real-time Leaderboard Dashboard](#phase-6-real-time-leaderboard-dashboard) *(Upcoming)*
+*   [Phase 7: Event-Driven Ingestion Bus (Kafka/Redpanda)](#phase-7-event-driven-ingestion-bus-kafkaredpanda) *(Upcoming)*
+*   [Phase 8: Low-latency Optimization & Kernel Tuning](#phase-8-low-latency-optimization--kernel-tuning) *(Upcoming)*
+
+---
+
+## Phase 1: Core Matching Engine & Local APIs
+
+This phase establishes the foundational in-memory limit order book (LOB) and the API layer required for clients to place orders and receive market data.
+
+### Architecture
 The Phase 1 matching engine is written in Go 1.22+ and is optimized for low-latency operations.
 
 ```
@@ -43,121 +60,81 @@ The Phase 1 matching engine is written in Go 1.22+ and is optimized for low-late
                   └──────────────┘
 ```
 
-### Design Decisions
-1. **Single-Threaded Matching Loop**: The core order book (`OrderBook`) is kept strictly single-threaded inside a dedicated Go event loop. All order submissions and cancellations flow through a buffered channel (`inputChan`). This guarantees deterministic price-time matching without the overhead of mutex lock contention.
-2. **Double-Linked List Price Levels**: Each price level (`Limit` struct) uses a doubly-linked list of `Order` structs to achieve $O(1)$ insertions at the tail, and $O(1)$ removals from anywhere in the queue during cancellations.
-3. **Thread-Safe Depth Cache**: To prevent HTTP readers from blocking the core matching thread (or causing race conditions), the server computes an L2 book snapshot at a throttled interval (50ms) and caches it inside a read-write-locked (`sync.RWMutex`) structure.
+**Key Design Decisions:**
+1.  **Single-Threaded Matching Loop**: The core order book is single-threaded inside a Go event loop, fed by a buffered channel. This guarantees deterministic price-time matching without mutex lock contention.
+2.  **Double-Linked List Price Levels**: Each price level uses a doubly-linked list of orders to achieve $O(1)$ insertions at the tail, and $O(1)$ removals from anywhere during cancellations.
+3.  **Thread-Safe Depth Cache**: To prevent HTTP readers from blocking the core matching thread, an L2 book snapshot is computed at a throttled interval (50ms) and cached inside a `sync.RWMutex` structure.
 
----
+### API Reference
 
-## Directory Structure
-
-```
-├── cmd/
-│   └── matching-engine/
-│       └── main.go             # Entrypoint, route registration, graceful shutdown
-├── pkg/
-│   ├── orderbook/
-│   │   ├── order.go            # Order definitions & models
-│   │   ├── limit.go            # Doubly-linked list price levels
-│   │   ├── orderbook.go        # Matching and crossing algorithms
-│   │   └── orderbook_test.go   # Correctness unit tests & microbenchmarks
-│   └── api/
-│       ├── hub.go              # WebSocket connection manager & broadcast hub
-│       ├── server.go           # REST server and event-loop coordinator
-│       └── server_test.go      # HTTP and WebSocket integration tests
-├── go.mod
-├── go.sum
-└── README.md
-```
-
----
-
-## API Reference (Phase 1)
-
-### REST Endpoints
-* **Place Order**: `POST /api/v1/orders`
-  * Body:
+#### REST Endpoints
+*   **Place Order**: `POST /api/v1/orders`
     ```json
-    {
-      "id": "order-101",
-      "side": 0,      // 0 = Buy, 1 = Sell
-      "type": 0,      // 0 = Limit, 1 = Market
-      "price": 15000, // E.g., 150.00 (represented as integer cents)
-      "quantity": 10
-    }
+    { "id": "ord-101", "side": 0, "type": 0, "price": 15000, "quantity": 10 }
+    // Side: 0=Buy, 1=Sell | Type: 0=Limit, 1=Market
     ```
-  * Response:
-    ```json
-    {
-      "success": true,
-      "trades": [
-        {
-          "maker_order_id": "sell-order-abc",
-          "taker_order_id": "order-101",
-          "price": 15000,
-          "quantity": 10
-        }
-      ]
-    }
-    ```
+*   **Cancel Order**: `DELETE /api/v1/orders/{id}`
+*   **Fetch Depth Snapshot**: `GET /api/v1/orderbook`
 
-* **Cancel Order**: `DELETE /api/v1/orders/{id}`
-  * Response:
-    ```json
-    {
-      "success": true
-    }
-    ```
+#### WebSocket Streams
+*   **Market Data Connection**: `GET /ws/market-data`
+    *   `trade`: Emitted immediately on matching executions.
+    *   `depth`: Throttled L2 snapshot broadcast every 50ms (if modified).
 
-* **Fetch Depth Snapshot**: `GET /api/v1/orderbook`
-  * Response:
-    ```json
-    {
-      "bids": [{"price": 14990, "volume": 50}],
-      "asks": [{"price": 15010, "volume": 120}]
-    }
-    ```
+### How to Run & Verify (Phase 1)
 
-### WebSocket Streams
-* **Market Data Connection**: `GET /ws/market-data`
-  * Event Types:
-    * `trade`: Emitted immediately when matching executions occur.
-    * `depth`: Throttled L2 snapshot (top 50 price levels) broadcast every 50ms (if modified).
+Ensure you have **Go 1.22+** installed.
 
----
-
-## How to Run & Verify
-
-Ensure you have **Go 1.22+** installed on your system.
-
-### 1. Compile the Binary
-To compile the matching engine server:
-```bash
+#### 1. Compile the Binary
+```powershell
 go build -o matching-engine.exe ./cmd/matching-engine
 ```
+*(Note: The `.exe` file is intentionally ignored by Git via `.gitignore` to keep the repository clean).*
 
-### 2. Run the Server
+#### 2. Run the Server
 Run the executable (defaults to port `8080`):
-```bash
-./matching-engine.exe --port 8080
+```powershell
+.\matching-engine.exe --port 8080
 ```
 
-### 3. Run Correctness Tests
-To execute all unit and integration tests across packages:
-```bash
+#### 3. Run Correctness Tests
+Execute all unit and integration tests:
+```powershell
 go test -v ./...
 ```
 
-### 4. Run Microbenchmarks
-To measure execution throughput and memory allocations under simulated matches:
-```bash
+#### 4. Run Microbenchmarks
+Measure execution throughput and memory allocations:
+```powershell
 go test -bench="." -benchmem ./pkg/orderbook
 ```
+*Expected Performance (AMD Ryzen 7): ~2.46 microseconds per order match (~406,000 matches/second).*
 
-#### Benchmark Results (Windows, AMD Ryzen 7 7730U)
-```
-BenchmarkOrderBook_Matching-16    626794    2458 ns/op    160 B/op    2 allocs/op
-```
-* **Performance**: ~2.46 microseconds per order match operation (~406,000 matches/second).
-* **Efficiency**: Highly memory-efficient path (only 2 allocations per cycle).
+---
+
+## Phase 2: Concurrent Distributed Load Generator
+*(Documentation to be added in `phase-2` branch)*
+
+---
+## Phase 3: Metrics & Telemetry Pipeline
+*(Documentation to be added in `phase-3` branch)*
+
+---
+## Phase 4: Contestant Submission System & Docker Sandboxing
+*(Documentation to be added in `phase-4` branch)*
+
+---
+## Phase 5: Kubernetes Orchestration & Fleet Autoscaling
+*(Documentation to be added in `phase-5` branch)*
+
+---
+## Phase 6: Real-time Leaderboard Dashboard
+*(Documentation to be added in `phase-6` branch)*
+
+---
+## Phase 7: Event-Driven Ingestion Bus (Kafka/Redpanda)
+*(Documentation to be added in `phase-7` branch)*
+
+---
+## Phase 8: Low-latency Optimization & Kernel Tuning
+*(Documentation to be added in `phase-8` branch)*
