@@ -114,6 +114,8 @@ go test -bench="." -benchmem ./pkg/orderbook
 
 ## Phase 2: Concurrent Distributed Load Generator
 
+> **Note**: Phase 2 implementation is complete. To test this specific phase, you can check out commit `fbbba9d34f22afd0cafd3dbbc75f4256ac87d6ff`.
+
 This phase introduces a highly concurrent HTTP load generator used to simulate high-frequency trading bot traffic against the Phase 1 matching engine.
 
 ### How to Run & Verify (Phase 2)
