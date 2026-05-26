@@ -149,7 +149,63 @@ If you are viewing the codebase in the future and want to test exactly how it lo
 
 ---
 ## Phase 3: Metrics & Telemetry Pipeline
-*(Documentation to be added in `phase-3` branch)*
+
+> **Note**: Phase 3 implementation is complete. To test this specific phase, you can check out commit `phase-3` branch.
+
+This phase wires the full observability stack — **Prometheus**, **Grafana**, **TimescaleDB**, and **Redis** — into our existing matching engine and load generator. Every order match and HTTP round trip now emits real-time metrics viewable in a live Grafana dashboard.
+
+### Architecture
+
+```
+Matching Engine  ---> [/metrics on :2112] <--- Prometheus ----> Grafana Dashboard
+Load Generator   ---> [/metrics on :2113] <--- Prometheus
+TimescaleDB      <--- Telemetry Aggregator (stores historical run data)
+Redis            <--- Telemetry Aggregator (fast leaderboard caching)
+```
+
+### How to Run & Verify (Phase 3)
+
+#### 1. Start the Observability Stack
+From the repository root, spin up Prometheus, Grafana, TimescaleDB and Redis with Docker Compose:
+```powershell
+docker-compose -f deployments/docker-compose.yml up -d
+```
+
+#### 2. Start the Matching Engine with Telemetry
+Open a terminal and run (note the telemetry port is exposed on `:2112` by default):
+```powershell
+go run ./cmd/matching-engine --port 8080
+```
+
+#### 3. Run the Load Generator with Telemetry
+Open a second terminal (telemetry will emit on `:2113` by default):
+```powershell
+go run ./cmd/load-generator -endpoint http://localhost:8080 -tps 1000 -duration 60s -bots 5
+```
+
+#### 4. Open Grafana
+Navigate to **http://localhost:3000** in your browser. Login with `admin / admin`.
+
+You will find a pre-provisioned **"Trading Platform KPIs"** dashboard showing:
+- **Orders Processed/sec** (by side and order type)
+- **Matching Engine Latency** (p50, p90, p99 percentiles)
+- **Load Generator TPS** (success vs error)
+- **Load Generator RTT Latency** (p50, p90, p99 client-side round trip)
+
+#### 5. Check Raw Prometheus Metrics (optional)
+- Matching engine: http://localhost:2112/metrics
+- Load generator: http://localhost:2113/metrics
+- Prometheus UI: http://localhost:9090
+
+#### 6. Shut Down the Stack
+```powershell
+docker-compose -f deployments/docker-compose.yml down
+```
+
+#### How to test this specific Phase
+1. `git checkout <phase-3-commit-hash>` (will be added once merged to main)
+2. Run the stack using the instructions above.
+3. `git checkout main` (Returns you to the latest code).
 
 ---
 ## Phase 4: Contestant Submission System & Docker Sandboxing

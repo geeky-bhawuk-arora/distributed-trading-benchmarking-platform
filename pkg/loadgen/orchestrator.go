@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"sync"
 	"time"
+
+	"distributed-trading-benchmarking-platform/pkg/telemetry"
 )
 
 type Orchestrator struct {
@@ -50,10 +52,15 @@ func (o *Orchestrator) Run() {
 	go func() {
 		for m := range metricsChan {
 			totalRequests++
+			status := "error"
 			if m.IsSuccess {
 				successCount++
+				status = "success"
 			}
 			totalLatency += m.Latency
+
+			telemetry.LoadGenRequests.WithLabelValues(status).Inc()
+			telemetry.LoadGenLatency.Observe(m.Latency.Seconds())
 		}
 		close(metricsDone)
 	}()

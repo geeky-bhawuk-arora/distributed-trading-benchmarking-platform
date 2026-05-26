@@ -11,13 +11,16 @@ import (
 	"time"
 
 	"distributed-trading-benchmarking-platform/pkg/api"
+	"distributed-trading-benchmarking-platform/pkg/telemetry"
 )
 
 func main() {
 	port := flag.String("port", "8080", "Port to run the matching engine on")
+	telemetryPort := flag.String("telemetry-port", ":2112", "Port to expose Prometheus metrics")
 	flag.Parse()
 
 	log.Printf("Starting Matching Engine on port %s...", *port)
+	telemetry.StartMetricsServer(*telemetryPort)
 
 	// Create and start the API Server
 	server := api.NewServer()

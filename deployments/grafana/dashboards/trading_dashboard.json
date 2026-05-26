@@ -1,0 +1,76 @@
+{
+  "title": "Trading Platform KPIs",
+  "uid": "trading-kpis",
+  "schemaVersion": 36,
+  "refresh": "1s",
+  "panels": [
+    {
+      "type": "timeseries",
+      "title": "Orders Processed / sec (Matching Engine)",
+      "gridPos": { "x": 0, "y": 0, "w": 12, "h": 8 },
+      "targets": [
+        {
+          "datasource": "Prometheus",
+          "expr": "rate(trading_orders_processed_total[5s])",
+          "legendFormat": "{{side}} / {{type}}"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Matching Engine Latency (p50 / p90 / p99)",
+      "gridPos": { "x": 12, "y": 0, "w": 12, "h": 8 },
+      "targets": [
+        {
+          "datasource": "Prometheus",
+          "expr": "histogram_quantile(0.50, rate(trading_matching_duration_seconds_bucket[5s]))",
+          "legendFormat": "p50"
+        },
+        {
+          "datasource": "Prometheus",
+          "expr": "histogram_quantile(0.90, rate(trading_matching_duration_seconds_bucket[5s]))",
+          "legendFormat": "p90"
+        },
+        {
+          "datasource": "Prometheus",
+          "expr": "histogram_quantile(0.99, rate(trading_matching_duration_seconds_bucket[5s]))",
+          "legendFormat": "p99"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Load Generator TPS",
+      "gridPos": { "x": 0, "y": 8, "w": 12, "h": 8 },
+      "targets": [
+        {
+          "datasource": "Prometheus",
+          "expr": "rate(trading_loadgen_requests_total[5s])",
+          "legendFormat": "{{status}}"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Load Generator RTT Latency (p50 / p90 / p99)",
+      "gridPos": { "x": 12, "y": 8, "w": 12, "h": 8 },
+      "targets": [
+        {
+          "datasource": "Prometheus",
+          "expr": "histogram_quantile(0.50, rate(trading_loadgen_latency_seconds_bucket[5s]))",
+          "legendFormat": "p50"
+        },
+        {
+          "datasource": "Prometheus",
+          "expr": "histogram_quantile(0.90, rate(trading_loadgen_latency_seconds_bucket[5s]))",
+          "legendFormat": "p90"
+        },
+        {
+          "datasource": "Prometheus",
+          "expr": "histogram_quantile(0.99, rate(trading_loadgen_latency_seconds_bucket[5s]))",
+          "legendFormat": "p99"
+        }
+      ]
+    }
+  ]
+}

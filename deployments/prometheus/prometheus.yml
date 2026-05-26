@@ -1,0 +1,12 @@
+global:
+  scrape_interval: 1s
+  evaluation_interval: 1s
+
+scrape_configs:
+  - job_name: 'matching-engine'
+    static_configs:
+      - targets: ['host.docker.internal:2112'] # matching engine telemetry port
+
+  - job_name: 'load-generator'
+    static_configs:
+      - targets: ['host.docker.internal:2113'] # load generator telemetry port

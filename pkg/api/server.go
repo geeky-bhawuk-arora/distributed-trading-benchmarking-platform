@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"distributed-trading-benchmarking-platform/pkg/orderbook"
+	"distributed-trading-benchmarking-platform/pkg/telemetry"
 )
 
 // RequestType identifies the action requested from the engine.
@@ -81,7 +82,18 @@ func (s *Server) runMatchingLoop() {
 		case req := <-s.inputChan:
 			switch req.Type {
 			case PlaceRequest:
+				start := time.Now()
 				trades := s.ob.Process(req.Order)
+				latency := time.Since(start).Seconds()
+				
+				orderType := "limit"
+				if req.Order.Type == 1 {
+					orderType = "market"
+				}
+
+				telemetry.MatchingDuration.Observe(latency)
+				telemetry.OrdersProcessed.WithLabelValues(req.Order.Side.String(), orderType).Inc()
+
 				req.Result <- Response{Success: true, Trades: trades}
 				bookChanged = true
 
