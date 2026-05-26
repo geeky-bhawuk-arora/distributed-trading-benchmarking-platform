@@ -141,6 +141,12 @@ go run ./cmd/load-generator -endpoint http://localhost:8080 -tps 1000 -duration 
 
 Once the run completes, it will output the total successful requests and the precise average client-side latency (Round-Trip Time).
 
+#### How to test this specific Phase
+If you are viewing the codebase in the future and want to test exactly how it looked at the end of Phase 2:
+1. `git checkout fbbba9d34f22afd0cafd3dbbc75f4256ac87d6ff` (This detaches your HEAD and goes back in time to this phase).
+2. Run the code using the instructions above.
+3. `git checkout main` (Returns you to the present/latest code).
+
 ---
 ## Phase 3: Metrics & Telemetry Pipeline
 *(Documentation to be added in `phase-3` branch)*
