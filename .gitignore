@@ -22,3 +22,6 @@ go.work.sum
 .idea/
 .vscode/
 *.swp
+
+# Contestant submission uploads (never commit source code)
+uploads/
