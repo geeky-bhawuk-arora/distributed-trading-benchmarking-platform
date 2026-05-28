@@ -256,7 +256,7 @@ Invoke-RestMethod -Uri http://localhost:9090/api/v1/submissions/{id}
 
 ## Phase 5: Kubernetes Orchestration & Fleet Autoscaling
 
-> **Note**: Phase 5 implementation is complete. To inspect files, check out commit `13c7a2d82aa13a1d20564d1ee09d91a291596425`.
+> **Note**: Phase 5 implementation is complete. To inspect files, check out commit `8152c7151eebca9282280923cecd9a6470d22876`.
 
 This phase adds cloud-native Kubernetes orchestration and fleet autoscaling to the benchmarking platform:
 - **Custom CRD `BenchmarkRun`** defines the custom resource schema for runs.
