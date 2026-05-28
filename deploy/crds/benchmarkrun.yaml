@@ -1,0 +1,56 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: benchmarkruns.trading.benchmarking.platform
+spec:
+  group: trading.benchmarking.platform
+  versions:
+    - name: v1alpha1
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              required:
+                - contestantId
+                - submissionId
+                - image
+              properties:
+                contestantId:
+                  type: string
+                submissionId:
+                  type: string
+                image:
+                  type: string
+                duration:
+                  type: string
+                  default: "60s"
+                tps:
+                  type: integer
+                  default: 1000
+                bots:
+                  type: integer
+                  default: 5
+            status:
+              type: object
+              properties:
+                state:
+                  type: string
+                startedAt:
+                  type: string
+                completedAt:
+                  type: string
+                totalOrders:
+                  type: integer
+                successRate:
+                  type: number
+  scope: Namespaced
+  names:
+    plural: benchmarkruns
+    singular: benchmarkrun
+    kind: BenchmarkRun
+    shortNames:
+      - brun

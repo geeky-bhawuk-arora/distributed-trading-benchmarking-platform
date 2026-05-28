@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Distributed Trading Platform Leaderboard</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="glow-bg"></div>
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <div class="logo">
+                <span class="logo-accent">TRADING</span>.BENCHMARK
+            </div>
+            <div class="status-bar">
+                <div class="status-indicator">
+                    <span id="connection-dot" class="dot disconnected"></span>
+                    <span id="connection-text" class="status-label">DISCONNECTED</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Dashboard Layout -->
+        <main class="dashboard-grid">
+            
+            <!-- Left Side: Leaderboard Table -->
+            <section class="card leaderboard-card">
+                <div class="card-header">
+                    <h2>Live Standings</h2>
+                    <span class="badge">GLOBAL TOP 50</span>
+                </div>
+                <div class="table-container">
+                    <table id="leaderboard-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 8%">Rank</th>
+                                <th style="width: 25%">Team / Contestant</th>
+                                <th style="width: 20%">TPS (Throughput)</th>
+                                <th style="width: 17%">p99 Latency</th>
+                                <th style="width: 15%">Success Rate</th>
+                                <th style="width: 15%">Score</th>
+                            </tr>
+                        </thead>
+                        <tbody id="leaderboard-body">
+                            <!-- Populated via JS -->
+                            <tr class="placeholder-row">
+                                <td colspan="6">Loading live leaderboard data...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Right Side: Charts & Logs -->
+            <div class="right-column">
+                <!-- Metrics Chart -->
+                <section class="card chart-card">
+                    <div class="card-header">
+                        <h2>Real-Time Performance</h2>
+                        <span class="badge neon-blue">LIVE METRICS</span>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="performance-chart"></canvas>
+                    </div>
+                </section>
+
+                <!-- Activity Feed / Live Run Events -->
+                <section class="card feed-card">
+                    <div class="card-header">
+                        <h2>Live Activities</h2>
+                        <span class="badge neon-purple">SYSTEM FEED</span>
+                    </div>
+                    <div class="feed-content" id="activity-feed">
+                        <div class="feed-item system">
+                            <span class="feed-time">System</span>
+                            <span class="feed-msg">Subscribing to active benchmark events...</span>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <!-- Script -->
+    <script src="app.js"></script>
+</body>
+</html>

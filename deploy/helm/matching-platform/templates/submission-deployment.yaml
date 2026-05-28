@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "matching-platform.fullname" . }}-submission
+  labels:
+    app: submission-service
+spec:
+  replicas: {{ .Values.submissionService.replicaCount }}
+  selector:
+    matchLabels:
+      app: submission-service
+  template:
+    metadata:
+      labels:
+        app: submission-service
+    spec:
+      containers:
+        - name: submission-service
+          image: "{{ .Values.image.repository }}/submission-service:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.submissionService.port }}
+              protocol: TCP
+          env:
+            - name: PORT
+              value: "{{ .Values.submissionService.port }}"
+            - name: REDIS_HOST
+              value: "{{ .Values.redis.host }}"
+            - name: REDIS_PORT
+              value: "{{ .Values.redis.port }}"
+            - name: DB_HOST
+              value: "{{ .Values.timescaledb.host }}"
+            - name: DB_PORT
+              value: "{{ .Values.timescaledb.port }}"
+          resources:
+            {{- toYaml .Values.submissionService.resources | nindent 12 }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "matching-platform.fullname" . }}-submission
+  labels:
+    app: submission-service
+spec:
+  type: ClusterIP
+  ports:
+    - port: {{ .Values.submissionService.port }}
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app: submission-service

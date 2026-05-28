@@ -1,0 +1,24 @@
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: {{ include "matching-platform.fullname" . }}-loadgen-scaler
+  labels:
+    app: load-generator
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ include "matching-platform.fullname" . }}-load-generator
+  minReplicaCount: 1
+  maxReplicaCount: 100
+  cooldownPeriod: 30
+  pollingInterval: 5
+  triggers:
+    - type: redis
+      metadata:
+        host: "{{ .Values.redis.host }}"
+        port: "{{ .Values.redis.port }}"
+        # Scales based on a Redis key "benchmark:active_bots" or list length
+        key: "benchmark:target_tps"
+        value: "1000" # Each pod handles 1000 TPS of load
+        type: "string" # Treat the key as a simple string value containing the TPS target

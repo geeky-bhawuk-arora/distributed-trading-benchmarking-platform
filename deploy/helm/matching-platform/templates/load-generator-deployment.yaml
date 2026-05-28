@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "matching-platform.fullname" . }}-load-generator
+  labels:
+    app: load-generator
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: load-generator
+  template:
+    metadata:
+      labels:
+        app: load-generator
+        role: load-generator
+    spec:
+      containers:
+        - name: load-generator
+          image: "{{ .Values.image.repository }}/load-generator:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args:
+            - "-endpoint"
+            - "http://contestant-runner.run-namespace.svc.cluster.local:8080"
+            - "-tps"
+            - "1000"
+            - "-duration"
+            - "60s"
+            - "-bots"
+            - "5"
+          ports:
+            - name: telemetry
+              containerPort: 2113
+              protocol: TCP
+          resources:
+            limits:
+              cpu: 500m
+              memory: 512Mi
+            requests:
+              cpu: 100m
+              memory: 128Mi
