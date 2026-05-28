@@ -292,7 +292,7 @@ This phase implements a real-time, low-latency scoring leaderboard and glassmorp
 
 ## Phase 7: Event-Driven Ingestion Bus (Kafka/Redpanda)
 
-> **Note**: Phase 7 implementation is complete. To inspect files, check out commit `0e2cfc359407af44c372a7e202cb98e7600b9a75`.
+> **Note**: Phase 7 implementation is complete. To inspect files, check out commit `325fd18b20766a674fef541e86cf1ef4eab7ea38`.
 
 This phase decouples telemetry ingestion by integrating a high-throughput, fault-tolerant messaging bus:
 - **Redpanda Integration**: Configured a single-broker Redpanda instance (fully Kafka API compatible) in `deployments/docker-compose.yml`.
@@ -303,7 +303,7 @@ This phase decouples telemetry ingestion by integrating a high-throughput, fault
 ---
 ## Phase 8: Low-latency Optimization & Kernel Tuning
 
-> **Note**: Phase 8 implementation is complete. To inspect files, check out commit `0e2cfc359407af44c372a7e202cb98e7600b9a75`.
+> **Note**: Phase 8 implementation is complete. To inspect files, check out commit `325fd18b20766a674fef541e86cf1ef4eab7ea38`.
 
 This phase maximizes order matching speed and establishes high-performance low-level systems:
 - **eBPF Socket Latency Probe**: [`ebpf/socket_latency.c`](file:///c:/Users/bhawu/Documents/GitHub/distributed-trading-benchmarking-platform/ebpf/socket_latency.c) compiles C-based kernel hooks to measure TCP handshake RTTs. [`ebpf/main.go`](file:///c:/Users/bhawu/Documents/GitHub/distributed-trading-benchmarking-platform/ebpf/main.go) consumes the ring buffer and provides a user-space socket timing fallback for Windows hosts.
