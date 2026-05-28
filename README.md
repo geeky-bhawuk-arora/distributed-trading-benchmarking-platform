@@ -24,13 +24,13 @@ To manage the complexity of this project, we follow a strict phase-wise branchin
 Click on any phase below to jump to its specific implementation details and documentation.
 
 *   [Phase 1: Core Matching Engine & Local APIs](#phase-1-core-matching-engine--local-apis) *(Completed)*
-*   [Phase 2: Concurrent Distributed Load Generator](#phase-2-concurrent-distributed-load-generator) *(Upcoming)*
-*   [Phase 3: Metrics & Telemetry Pipeline](#phase-3-metrics--telemetry-pipeline) *(Upcoming)*
-*   [Phase 4: Contestant Submission System & Docker Sandboxing](#phase-4-contestant-submission-system--docker-sandboxing) *(Upcoming)*
-*   [Phase 5: Kubernetes Orchestration & Fleet Autoscaling](#phase-5-kubernetes-orchestration--fleet-autoscaling) *(Upcoming)*
-*   [Phase 6: Real-time Leaderboard Dashboard](#phase-6-real-time-leaderboard-dashboard) *(Upcoming)*
-*   [Phase 7: Event-Driven Ingestion Bus (Kafka/Redpanda)](#phase-7-event-driven-ingestion-bus-kafkaredpanda) *(Upcoming)*
-*   [Phase 8: Low-latency Optimization & Kernel Tuning](#phase-8-low-latency-optimization--kernel-tuning) *(Upcoming)*
+*   [Phase 2: Concurrent Distributed Load Generator](#phase-2-concurrent-distributed-load-generator) *(Completed)*
+*   [Phase 3: Metrics & Telemetry Pipeline](#phase-3-metrics--telemetry-pipeline) *(Completed)*
+*   [Phase 4: Contestant Submission System & Docker Sandboxing](#phase-4-contestant-submission-system--docker-sandboxing) *(Completed)*
+*   [Phase 5: Kubernetes Orchestration & Fleet Autoscaling](#phase-5-kubernetes-orchestration--fleet-autoscaling) *(Completed)*
+*   [Phase 6: Real-time Leaderboard Dashboard](#phase-6-real-time-leaderboard-dashboard) *(Completed)*
+*   [Phase 7: Event-Driven Ingestion Bus (Kafka/Redpanda)](#phase-7-event-driven-ingestion-bus-kafkaredpanda) *(Completed)*
+*   [Phase 8: Low-latency Optimization & Kernel Tuning](#phase-8-low-latency-optimization--kernel-tuning) *(Completed)*
 
 ---
 
@@ -203,7 +203,7 @@ docker-compose -f deployments/docker-compose.yml down
 ```
 
 #### How to test this specific Phase
-1. `git checkout <phase-3-commit-hash>` (will be added once merged to main)
+1. `git checkout 9533889fb15b96f725bf8273958607f29c733f59` (will be added once merged to main)
 2. Run the stack using the instructions above.
 3. `git checkout main` (Returns you to the latest code).
 
@@ -250,13 +250,13 @@ Invoke-RestMethod -Uri http://localhost:9090/api/v1/submissions/{id}
 ```
 
 #### How to test this specific Phase
-1. `git checkout <phase-4-commit-hash>` (will be updated once merged)
+1. `git checkout 425d956471d989ff665015a9d8e3d0bdd81a6d77` (will be updated once merged)
 2. Run the service using the instructions above.
 3. `git checkout main` to return.
 
 ## Phase 5: Kubernetes Orchestration & Fleet Autoscaling
 
-> **Note**: Phase 5 implementation is complete. To inspect files, check out commit `8152c7151eebca9282280923cecd9a6470d22876`.
+> **Note**: Phase 5 implementation is complete. To inspect files, check out commit `261e52e51eebca9282280923cecd9a6470d22876`.
 
 This phase adds cloud-native Kubernetes orchestration and fleet autoscaling to the benchmarking platform:
 - **Custom CRD `BenchmarkRun`** defines the custom resource schema for runs.
@@ -292,7 +292,7 @@ This phase implements a real-time, low-latency scoring leaderboard and glassmorp
 
 ## Phase 7: Event-Driven Ingestion Bus (Kafka/Redpanda)
 
-> **Note**: Phase 7 implementation is complete. To inspect files, check out commit `a7f9b4d4554b73b50c059a44458cdbc94cf21d8b`.
+> **Note**: Phase 7 implementation is complete. To inspect files, check out commit `3d03e60e0a5ea6c4d8ce7b70bc9744c803f26038`.
 
 This phase decouples telemetry ingestion by integrating a high-throughput, fault-tolerant messaging bus:
 - **Redpanda Integration**: Configured a single-broker Redpanda instance (fully Kafka API compatible) in `deployments/docker-compose.yml`.
@@ -303,7 +303,7 @@ This phase decouples telemetry ingestion by integrating a high-throughput, fault
 ---
 ## Phase 8: Low-latency Optimization & Kernel Tuning
 
-> **Note**: Phase 8 implementation is complete. To inspect files, check out commit `a7f9b4d4554b73b50c059a44458cdbc94cf21d8b`.
+> **Note**: Phase 8 implementation is complete. To inspect files, check out commit `3d03e60e0a5ea6c4d8ce7b70bc9744c803f26038`.
 
 This phase maximizes order matching speed and establishes high-performance low-level systems:
 - **eBPF Socket Latency Probe**: [`ebpf/socket_latency.c`](file:///c:/Users/bhawu/Documents/GitHub/distributed-trading-benchmarking-platform/ebpf/socket_latency.c) compiles C-based kernel hooks to measure TCP handshake RTTs. [`ebpf/main.go`](file:///c:/Users/bhawu/Documents/GitHub/distributed-trading-benchmarking-platform/ebpf/main.go) consumes the ring buffer and provides a user-space socket timing fallback for Windows hosts.
