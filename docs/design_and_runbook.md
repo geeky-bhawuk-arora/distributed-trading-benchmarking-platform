@@ -98,3 +98,15 @@ docker-compose -f deployments/docker-compose.yml up -d
    ```powershell
    go run ./ebpf/main.go --port 8080
    ```
+
+### Phase E: Automated Local Demo (All-in-One Script)
+Instead of starting each service manually in multiple terminals, you can run the entire platform end-to-end using a single command:
+```powershell
+.\scripts\run_local_demo.ps1
+```
+This script:
+1. Starts the Docker Compose stack (databases & queues).
+2. Spawns the leaderboard and matching engine services in the background.
+3. Automatically opens **http://localhost:8282** in your browser.
+4. Performs a 15-second load test with 5 bots targeting 1500 TPS.
+5. Shuts down and cleans up all background processes automatically.
