@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"distributed-trading-benchmarking-platform/pkg/leaderboard"
+	"distributed-trading-benchmarking-platform/pkg/queue"
 
 	"github.com/redis/go-redis/v9"
 )
@@ -43,6 +44,25 @@ func main() {
 	hubCtx, hubCancel := context.WithCancel(context.Background())
 	defer hubCancel()
 	go hub.Run(hubCtx, rdb)
+
+	// Start Redpanda background consumer to process telemetry runs asynchronously
+	go func() {
+		// Give Redpanda broker time to warm up if recently started
+		time.Sleep(3 * time.Second)
+		brokers := []string{"localhost:9092"}
+		consumer := queue.NewConsumer(brokers, "leaderboard-processors")
+		defer consumer.Close()
+
+		consumer.StartListening(hubCtx, func(event *queue.TelemetryEvent) error {
+			log.Printf("[event-bus] Received telemetry run from Redpanda: %s for team %s", event.SubmissionID, event.ContestantID)
+			score, err := leaderboard.UpdateScore(hubCtx, rdb, event.SubmissionID, event.ContestantID, event.TPS, event.P99LatencyMS, event.SuccessRate)
+			if err != nil {
+				return err
+			}
+			log.Printf("[event-bus] Successfully updated standings. Score: %f", score)
+			return nil
+		})
+	}()
 
 	// Router setup
 	mux := http.NewServeMux()

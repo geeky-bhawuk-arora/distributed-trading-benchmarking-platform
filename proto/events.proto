@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+package events;
+
+option go_package = "distributed-trading-benchmarking-platform/pkg/queue/events";
+
+message TelemetryEvent {
+    string submission_id = 1;
+    string contestant_id = 2;
+    double tps = 3;
+    double p99_latency_ms = 4;
+    double success_rate = 5;
+    int64 timestamp = 6;
+}
